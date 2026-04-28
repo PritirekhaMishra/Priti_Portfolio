@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        /* Dark theme base - using #121212 as recommended by Material Design [^12^] */
+        body {
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            min-height: 100vh;
+            color: #e0e0e0;
+        }
+        
+        /* Glassmorphism base styles [^9^][^17^] */
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+            transition: all 0.3s ease;
+        }
+        
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.12);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+        
+        .glass-input {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .glass-input:focus {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #06b6d4;
+            box-shadow: 0 0 20px rgba(6, 182, 212, 0.3);
+            outline: none;
+        }
+        
+        .glass-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        /* Gradient buttons - cyan to purple */
+        .btn-gradient {
+            background: linear-gradient(135deg, #06b6d4 0%, #8b5cf6 100%);
+            border: none;
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(6, 182, 212, 0.4);
+        }
+        
+        .btn-gradient::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn-gradient:hover::before {
+            left: 100%;
+        }
+        
+        /* Neon hover effects */
+        .neon-hover {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .neon-hover:hover {
+            text-shadow: 0 0 10px rgba(6, 182, 212, 0.8), 0 0 20px rgba(6, 182, 212, 0.4);
+            color: #06b6d4;
+        }
+        
+        /* Sidebar styles */
+        .sidebar {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar-link {
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+        
+        .sidebar-link:hover, .sidebar-link.active {
+            background: rgba(6, 182, 212, 0.1);
+            border-left-color: #06b6d4;
+            color: #06b6d4;
+        }
+        
+        .sidebar-link.active {
+            background: rgba(6, 182, 212, 0.15);
+        }
+        
+        /* Stats cards with icons */
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 24px;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(6, 182, 212, 0.5);
+            box-shadow: 0 20px 40px rgba(6, 182, 212, 0.2);
+        }
+        
+        .stat-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        
+        /* Table styles */
+        .glass-table {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+        
+        .glass-table th {
+            background: rgba(255, 255, 255, 0.1);
+            color: #06b6d4;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+            padding: 16px;
+        }
+        
+        .glass-table td {
+            padding: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .glass-table tr:hover td {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        /* Modal styles */
+        .modal-overlay {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal-content {
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+        }
+        
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: rgba(6, 182, 212, 0.5);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(6, 182, 212, 0.8);
+        }
+        
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+        
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(6, 182, 212, 0.3); }
+            50% { box-shadow: 0 0 40px rgba(6, 182, 212, 0.6); }
+        }
+        
+        .pulse-glow {
+            animation: pulse-glow 2s infinite;
+        }
+        
+        /* Toast notifications */
+        .toast {
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+        }
+        
+        .toast.success {
+            border-left: 4px solid #10b981;
+        }
+        
+        .toast.error {
+            border-left: 4px solid #ef4444;
+        }
+        
+        /* Toggle switch */
+        .toggle-switch {
+            position: relative;
+            width: 48px;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .toggle-switch.active {
+            background: linear-gradient(135deg, #06b6d4, #8b5cf6);
+        }
+        
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s;
+        }
+        
+        .toggle-switch.active::after {
+            transform: translateX(24px);
+        }
+        
+        /* Progress bar for skills */
+        .progress-bar {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            height: 8px;
+        }
+        
+        .progress-fill {
+            background: linear-gradient(90deg, #06b6d4, #8b5cf6);
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+        
+        /* Tag/Badge styles */
+        .tag {
+            background: rgba(6, 182, 212, 0.2);
+            color: #06b6d4;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            border: 1px solid rgba(6, 182, 212, 0.3);
+        }
+        
+        /* Loading spinner */
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top-color: #06b6d4;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .sidebar.open {
+                transform: translateX(0);
+            }
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <!-- Login Page -->
+    <div id="loginPage" class="min-h-screen flex items-center justify-center p-4">
+        <div class="glass-card w-full max-w-md p-8 animate-fade-in">
+            <div class="text-center mb-8">
+                <div class="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-cyan-400 to-purple-600 flex items-center justify-center">
+                    <i class="fas fa-shield-alt text-3xl text-white"></i>
+                </div>
+                <h1 class="text-3xl font-bold text-white mb-2">Admin Portal</h1>
+                <p class="text-gray-400">Portfolio Management Dashboard</p>
+            </div>
+            
+            <form id="loginForm" class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
+                    <div class="relative">
+                        <i class="fas fa-envelope absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        <input type="email" id="loginEmail" class="glass-input w-full pl-12 pr-4 py-3 rounded-xl" placeholder="admin@example.com" required>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Password</label>
+                    <div class="relative">
+                        <i class="fas fa-lock absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        <input type="password" id="loginPassword" class="glass-input w-full pl-12 pr-12 py-3 rounded-xl" placeholder="••••••••" required>
+                        <button type="button" id="togglePassword" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between">
+                    <label class="flex items-center cursor-pointer">
+                        <input type="checkbox" class="w-4 h-4 rounded border-gray-600 text-cyan-500 focus:ring-cyan-500 bg-gray-700">
+                        <span class="ml-2 text-sm text-gray-400">Remember me</span>
+                    </label>
+                    <a href="#" class="text-sm text-cyan-400 hover:text-cyan-300 transition">Forgot password?</a>
+                </div>
+                
+                <button type="submit" class="btn-gradient w-full py-3 rounded-xl font-semibold text-lg">
+                    <i class="fas fa-sign-in-alt mr-2"></i>Sign In
+                </button>
+            </form>
+            
+            <div class="mt-6 text-center">
+                <p class="text-sm text-gray-500">Protected by JWT Authentication</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard (Hidden by default) -->
+    <div id="dashboardPage" class="hidden min-h-screen">
+        <!-- Mobile Header -->
+        <div class="lg:hidden glass p-4 flex items-center justify-between sticky top-0 z-40">
+            <div class="flex items-center gap-3">
+                <button id="mobileMenuBtn" class="p-2 rounded-lg hover:bg-white/10 transition">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+                <span class="font-bold text-xl">Admin Portal</span>
+            </div>
+            <button id="mobileLogoutBtn" class="p-2 rounded-lg hover:bg-red-500/20 text-red-400 transition">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
+        </div>
+
+        <div class="flex">
+            <!-- Sidebar -->
+            <aside id="sidebar" class="sidebar fixed lg:static w-64 h-screen overflow-y-auto z-30 transform -translate-x-full lg:transform-none transition-transform duration-300">
+                <div class="p-6">
+                    <div class="flex items-center gap-3 mb-8">
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-400 to-purple-600 flex items-center justify-center">
+                            <i class="fas fa-shield-alt text-xl text-white"></i>
+                        </div>
+                        <div>
+                            <h2 class="font-bold text-lg">Admin Portal</h2>
+                            <p class="text-xs text-gray-400">Portfolio CMS</p>
+                        </div>
+                    </div>
+                    
+                    <nav class="space-y-2">
+                        <a href="#" data-page="dashboard" class="sidebar-link active flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:text-cyan-400">
+                            <i class="fas fa-tachometer-alt w-5"></i>
+                            <span>Dashboard</span>
+                        </a>
+                        <a href="#" data-page="projects" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:text-cyan-400">
+                            <i class="fas fa-folder-open w-5"></i>
+                            <span>Projects</span>
+                        </a>
+                        <a href="#" data-page="skills" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:text-cyan-400">
+                            <i class="fas fa-brain w-5"></i>
+                            <span>Skills</span>
+                        </a>
+                        <a href="#" data-page="messages" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:text-cyan-400">
+                            <i class="fas fa-envelope w-5"></i>
+                            <span>Messages</span>
+                            <span id="msgBadge" class="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full hidden">0</span>
+                        </a>
+                        <a href="#" data-page="education" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:text-cyan-400">
+                            <i class="fas fa-graduation-cap w-5"></i>
+                            <span>Education</span>
+                        </a>
+                    </nav>
+                </div>
+                
+                <div class="absolute bottom-0 left-0 right-0 p-6 border-t border-white/10">
+                    <div class="flex items-center gap-3 mb-4">
+                        <img src="https://ui-avatars.com/api/?name=Admin+User&background=06b6d4&color=fff" alt="Admin" class="w-10 h-10 rounded-full">
+                        <div>
+                            <p class="font-medium text-sm">Administrator</p>
+                            <p class="text-xs text-gray-400">admin@portfolio.com</p>
+                        </div>
+                    </div>
+                    <button id="logoutBtn" class="w-full py-2 px-4 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 transition flex items-center justify-center gap-2">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </button>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="flex-1 p-4 lg:p-8 overflow-x-hidden">
+                <!-- Dashboard Section -->
+                <div id="dashboardSection" class="page-section">
+                    <div class="mb-8">
+                        <h1 class="text-3xl font-bold text-white mb-2">Dashboard Overview</h1>
+                        <p class="text-gray-400">Welcome back! Here's what's happening with your portfolio.</p>
+                    </div>
+                    
+                    <!-- Stats Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <div class="stat-card animate-fade-in" style="animation-delay: 0.1s">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="stat-icon bg-gradient-to-br from-cyan-500/20 to-cyan-600/20 text-cyan-400">
+                                    <i class="fas fa-folder-open"></i>
+                                </div>
+                                <span class="text-xs text-gray-400">Total</span>
+                            </div>
+                            <h3 class="text-3xl font-bold text-white mb-1" id="totalProjects">0</h3>
+                            <p class="text-sm text-gray-400">Projects</p>
+                        </div>
+                        
+                        <div class="stat-card animate-fade-in" style="animation-delay: 0.2s">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="stat-icon bg-gradient-to-br from-purple-500/20 to-purple-600/20 text-purple-400">
+                                    <i class="fas fa-brain"></i>
+                                </div>
+                                <span class="text-xs text-gray-400">Total</span>
+                            </div>
+                            <h3 class="text-3xl font-bold text-white mb-1" id="totalSkills">0</h3>
+                            <p class="text-sm text-gray-400">Skills</p>
+                        </div>
+                        
+                        <div class="stat-card animate-fade-in" style="animation-delay: 0.3s">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="stat-icon bg-gradient-to-br from-emerald-500/20 to-emerald-600/20 text-emerald-400">
+                                    <i class="fas fa-envelope"></i>
+                                </div>
+                                <span class="text-xs text-gray-400">New</span>
+                            </div>
+                            <h3 class="text-3xl font-bold text-white mb-1" id="totalMessages">0</h3>
+                            <p class="text-sm text-gray-400">Messages</p>
+                        </div>
+                        
+                        <div class="stat-card animate-fade-in" style="animation-delay: 0.4s">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="stat-icon bg-gradient-to-br from-amber-500/20 to-amber-600/20 text-amber-400">
+                                    <i class="fas fa-graduation-cap"></i>
+                                </div>
+                                <span class="text-xs text-gray-400">Total</span>
+                            </div>
+                            <h3 class="text-3xl font-bold text-white mb-1" id="totalEducation">0</h3>
+                            <p class="text-sm text-gray-400">Education</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Recent Activity -->
+                    <div class="glass-card p-6">
+                        <h3 class="text-xl font-bold text-white mb-4">Recent Activity</h3>
+                        <div id="recentActivity" class="space-y-4">
+                            <p class="text-gray-400 text-center py-8">No recent activity</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Projects Section -->
+                <div id="projectsSection" class="page-section hidden">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+                        <div>
+                            <h1 class="text-3xl font-bold text-white mb-2">Projects</h1>
+                            <p class="text-gray-400">Manage your portfolio projects</p>
+                        </div>
+                        <button onclick="openProjectModal()" class="btn-gradient px-6 py-3 rounded-xl flex items-center gap-2">
+                            <i class="fas fa-plus"></i>
+                            <span>Add Project</span>
+                        </button>
+                    </div>
+                    
+                    <!-- Search and Filter -->
+                    <div class="glass-card p-4 mb-6 flex flex-col sm:flex-row gap-4">
+                        <div class="relative flex-1">
+                            <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                            <input type="text" id="projectSearch" class="glass-input w-full pl-12 pr-4 py-3 rounded-xl" placeholder="Search projects...">
+                        </div>
+                        <select id="projectFilter" class="glass-input px-4 py-3 rounded-xl">
+                            <option value="">All Projects</option>
+                            <option value="featured">Featured Only</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Projects Grid -->
+                    <div id="projectsGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                        <!-- Projects will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Skills Section -->
+                <div id="skillsSection" class="page-section hidden">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+                        <div>
+                            <h1 class="text-3xl font-bold text-white mb-2">Skills</h1>
+                            <p class="text-gray-400">Manage your technical skills</p>
+                        </div>
+                        <button onclick="openSkillModal()" class="btn-gradient px-6 py-3 rounded-xl flex items-center gap-2">
+                            <i class="fas fa-plus"></i>
+                            <span>Add Skill</span>
+                        </button>
+                    </div>
+                    
+                    <div id="skillsContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Skills will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Messages Section -->
+                <div id="messagesSection" class="page-section hidden">
+                    <div class="mb-8">
+                        <h1 class="text-3xl font-bold text-white mb-2">Contact Messages</h1>
+                        <p class="text-gray-400">Messages from your portfolio contact form</p>
+                    </div>
+                    
+                    <div class="glass-table overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Subject</th>
+                                    <th>Message</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="messagesTableBody">
+                                <!-- Messages will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Education Section -->
+                <div id="educationSection" class="page-section hidden">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+                        <div>
+                            <h1 class="text-3xl font-bold text-white mb-2">Education</h1>
+                            <p class="text-gray-400">Manage your educational background</p>
+                        </div>
+                        <button onclick="openEducationModal()" class="btn-gradient px-6 py-3 rounded-xl flex items-center gap-2">
+                            <i class="fas fa-plus"></i>
+                            <span>Add Education</span>
+                        </button>
+                    </div>
+                    
+                    <div id="educationContainer" class="space-y-4">
+                        <!-- Education items will be loaded here -->
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Project Modal -->
+    <div id="projectModal" class="fixed inset-0 z-50 hidden">
+        <div class="modal-overlay absolute inset-0" onclick="closeProjectModal()"></div>
+        <div class="absolute inset-0 flex items-center justify-center p-4">
+            <div class="modal-content w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 animate-fade-in">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-white" id="projectModalTitle">Add Project</h2>
+                    <button onclick="closeProjectModal()" class="text-gray-400 hover:text-white transition">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <form id="projectForm" class="space-y-6">
+                    <input type="hidden" id="projectId">
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Project Title *</label>
+                        <input type="text" id="projectTitle" class="glass-input w-full px-4 py-3 rounded-xl" required>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Description *</label>
+                        <textarea id="projectDescription" rows="4" class="glass-input w-full px-4 py-3 rounded-xl" required></textarea>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Tech Stack (comma separated)</label>
+                            <input type="text" id="projectTech" class="glass-input w-full px-4 py-3 rounded-xl" placeholder="React, Node.js, MongoDB">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Project Image URL</label>
+                            <input type="url" id="projectImage" class="glass-input w-full px-4 py-3 rounded-xl" placeholder="https://...">
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Live Demo Link *</label>
+                            <input type="url" id="projectDemo" class="glass-input w-full px-4 py-3 rounded-xl" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">GitHub Link</label>
+                            <input type="url" id="projectGithub" class="glass-input w-full px-4 py-3 rounded-xl">
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center gap-3">
+                        <label class="text-sm font-medium text-gray-300">Featured Project</label>
+                        <div id="projectFeatured" class="toggle-switch" onclick="this.classList.toggle('active')"></div>
+                    </div>
+                    
+                    <div class="flex gap-4 pt-4">
+                        <button type="button" onclick="closeProjectModal()" class="flex-1 py-3 rounded-xl border border-white/20 text-gray-300 hover:bg-white/5 transition">
+                            Cancel
+                        </button>
+                        <button type="submit" class="btn-gradient flex-1 py-3 rounded-xl">
+                            <i class="fas fa-save mr-2"></i>Save Project
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Skill Modal -->
+    <div id="skillModal" class="fixed inset-0 z-50 hidden">
+        <div class="modal-overlay absolute inset-0" onclick="closeSkillModal()"></div>
+        <div class="absolute inset-0 flex items-center justify-center p-4">
+            <div class="modal-content w-full max-w-lg p-6 animate-fade-in">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-white" id="skillModalTitle">Add Skill</h2>
+                    <button onclick="closeSkillModal()" class="text-gray-400 hover:text-white transition">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <form id="skillForm" class="space-y-6">
+                    <input type="hidden" id="skillId">
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Skill Name *</label>
+                        <input type="text" id="skillName" class="glass-input w-full px-4 py-3 rounded-xl" required>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Category *</label>
+                        <select id="skillCategory" class="glass-input w-full px-4 py-3 rounded-xl" required>
+                            <option value="">Select Category</option>
+                            <option value="Languages">Languages</option>
+                            <option value="Frontend">Frontend</option>
+                            <option value="Backend">Backend</option>
+                            <option value="Database">Database</option>
+                            <option value="DevOps">DevOps</option>
+                            <option value="Tools">Tools</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Proficiency (%)</label>
+                        <input type="range" id="skillPercentage" min="0" max="100" value="80" class="w-full accent-cyan-500">
+                        <div class="text-center text-cyan-400 font-bold mt-2" id="skillPercentageValue">80%</div>
+                    </div>
+                    
+                    <div class="flex gap-4 pt-4">
+                        <button type="button" onclick="closeSkillModal()" class="flex-1 py-3 rounded-xl border border-white/20 text-gray-300 hover:bg-white/5 transition">
+                            Cancel
+                        </button>
+                        <button type="submit" class="btn-gradient flex-1 py-3 rounded-xl">
+                            <i class="fas fa-save mr-2"></i>Save Skill
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Education Modal -->
+    <div id="educationModal" class="fixed inset-0 z-50 hidden">
+        <div class="modal-overlay absolute inset-0" onclick="closeEducationModal()"></div>
+        <div class="absolute inset-0 flex items-center justify-center p-4">
+            <div class="modal-content w-full max-w-lg p-6 animate-fade-in">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-white" id="educationModalTitle">Add Education</h2>
+                    <button onclick="closeEducationModal()" class="text-gray-400 hover:text-white transition">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <form id="educationForm" class="space-y-6">
+                    <input type="hidden" id="educationId">
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Degree/Certificate *</label>
+                        <input type="text" id="eduDegree" class="glass-input w-full px-4 py-3 rounded-xl" placeholder="Bachelor of Science in Computer Science" required>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Institution *</label>
+                        <input type="text" id="eduInstitution" class="glass-input w-full px-4 py-3 rounded-xl" placeholder="University Name" required>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Year *</label>
+                            <input type="text" id="eduYear" class="glass-input w-full px-4 py-3 rounded-xl" placeholder="2020 - 2024" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Score/GPA</label>
+                            <input type="text" id="eduScore" class="glass-input w-full px-4 py-3 rounded-xl" placeholder="3.8/4.0">
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-4 pt-4">
+                        <button type="button" onclick="closeEducationModal()" class="flex-1 py-3 rounded-xl border border-white/20 text-gray-300 hover:bg-white/5 transition">
+                            Cancel
+                        </button>
+                        <button type="submit" class="btn-gradient flex-1 py-3 rounded-xl">
+                            <i class="fas fa-save mr-2"></i>Save Education
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="fixed bottom-4 right-4 z-50 space-y-2"></div>
+
+    <script src="js/admin.js"></script>
+</body>
+</html>
