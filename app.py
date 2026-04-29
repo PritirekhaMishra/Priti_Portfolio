@@ -132,7 +132,7 @@ def verify_contact():
     try:
         msg = Message(
             subject="New Verified Portfolio Contact Message",
-            recipients=["pritirekha7978@gmail.com"]
+            recipients=[os.getenv("ADMIN_EMAIL")]
         )
 
         msg.body = f"""
